@@ -6,9 +6,10 @@
 /* betty style doc for function main goes there */
 
 /**
- * main - Entry point, assigns a random number to the n varible each time is executed
+ * main - Entry point, assigns a random number to the
+ * n varible each time is executed
  *
- * Return Always 0 (Success)
+ * Return: Always 0 (Success)
  */
 
 int main(void)
@@ -22,16 +23,17 @@ int main(void)
 	 last_digit = n % 10;
 	/* your code goes there */
 
-	printf("Last digit of %d is %d", n, last_digit);
-
 	if (last_digit > 5)
-		printf(" and is greater than 5\n");
+		printf("Last digit of %d is %d and is greater than 5\n",
+			n, last_digit);
 
 	else if (last_digit == 0)
-		printf(" and is 0\n");
+		printf("Last digit of %d is %d and is 0\n",
+			n, last_digit);
 
 	else
-		printf(" and is less than 6 and not 0\n");
+		printf("Last digit of %d is %d and is less than 6 and not 0\n",
+			n, last_digit);
 
 	return (0);
 }
