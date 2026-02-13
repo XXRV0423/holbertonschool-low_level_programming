@@ -15,7 +15,7 @@ int main(void)
 
 	c = 'A';
 
-	while(c <= 'Z')
+	while (c <= 'Z')
 		putchar(c++);
 
 	putchar('\n');
