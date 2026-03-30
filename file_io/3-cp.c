@@ -6,53 +6,36 @@
 #define BUFFER_SIZE 1024
 
 /**
- * main - copies content of a file to another file
- * @argc: argument count
- * @argv: argument vector
- *
- * Return: 0 on success, exits with error code on failure
+ * open_files - opens source and destination files
+ * @file_from: name of the source file
+ * @file_to: name of the destination file
+ * @fd_from: pointer to store source file descriptor
+ * @fd_to: pointer to store destination file descriptor
  */
-int main(int argc, char *argv[])
+void open_files(char *file_from, char *file_to, int *fd_from, int *fd_to)
 {
-	int fd_from, fd_to, r, w;
-	char buffer[BUFFER_SIZE];
-
-	if (argc != 3)
+	*fd_from = open(file_from, O_RDONLY);
+	if (*fd_from == -1)
 	{
-		dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
-		exit(97);
-	}
-
-	fd_from = open(argv[1], O_RDONLY);
-	if (fd_from == -1)
-	{
-		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", argv[1]);
+		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", file_from);
 		exit(98);
 	}
 
-	fd_to = open(argv[2], O_WRONLY | O_CREAT | O_TRUNC, 0664);
-	if (fd_to == -1)
+	*fd_to = open(file_to, O_WRONLY | O_CREAT | O_TRUNC, 0664);
+	if (*fd_to == -1)
 	{
-		dprintf(STDERR_FILENO, "Error: Can't write to %s\n", argv[2]);
+		dprintf(STDERR_FILENO, "Error: Can't write to %s\n", file_to);
 		exit(99);
 	}
+}
 
-	while ((r = read(fd_from, buffer, BUFFER_SIZE)) > 0)
-	{
-		w = write(fd_to, buffer, r);
-		if (w == -1)
-		{
-			dprintf(STDERR_FILENO, "Error: Can't write to %s\n", argv[2]);
-			exit(99);
-		}
-	}
-
-	if (r == -1)
-	{
-		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", argv[1]);
-		exit(98);
-	}
-
+/**
+ * close_files - closes source and destination file descriptors
+ * @fd_from: source file descriptor
+ * @fd_to: destination file descriptor
+ */
+void close_files(int fd_from, int fd_to)
+{
 	if (close(fd_from) == -1)
 	{
 		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd_from);
@@ -64,6 +47,57 @@ int main(int argc, char *argv[])
 		dprintf(STDERR_FILENO, "Error: Can't close fd %d\n", fd_to);
 		exit(100);
 	}
+}
+
+/**
+ * copy_content - reads from fd_from and writes to fd_to
+ * @fd_from: source file descriptor
+ * @fd_to: destination file descriptor
+ * @file_from: name of source file (for error messages)
+ * @file_to: name of destination file (for error messages)
+ */
+void copy_content(int fd_from, int fd_to, char *file_from, char *file_to)
+{
+	char buffer[BUFFER_SIZE];
+	int r, w;
+
+	while ((r = read(fd_from, buffer, BUFFER_SIZE)) > 0)
+	{
+		w = write(fd_to, buffer, r);
+		if (w == -1)
+		{
+			dprintf(STDERR_FILENO, "Error: Can't write to %s\n", file_to);
+			exit(99);
+		}
+	}
+
+	if (r == -1)
+	{
+		dprintf(STDERR_FILENO, "Error: Can't read from file %s\n", file_from);
+		exit(98);
+	}
+}
+
+/**
+ * main - copies content of a file to another file
+ * @argc: argument count
+ * @argv: argument vector
+ *
+ * Return: 0 on success, exits with error code on failure
+ */
+int main(int argc, char *argv[])
+{
+	int fd_from, fd_to;
+
+	if (argc != 3)
+	{
+		dprintf(STDERR_FILENO, "Usage: cp file_from file_to\n");
+		exit(97);
+	}
+
+	open_files(argv[1], argv[2], &fd_from, &fd_to);
+	copy_content(fd_from, fd_to, argv[1], argv[2]);
+	close_files(fd_from, fd_to);
 
 	return (0);
 }
